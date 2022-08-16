@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"golern/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -10,12 +11,12 @@ import (
 var DB *gorm.DB
 
 func InitDb() *gorm.DB {
-	host := "localhost"
-	port := "6333"
-	database := "golern"
-	username := "root"
-	password := "123456"
-	charset := "utf8"
+	host := viper.GetString("datasource.host")
+	port := viper.GetString("datasource.port")
+	database := viper.GetString("datasource.database")
+	username := viper.GetString("datasource.username")
+	password := viper.GetString("datasource.password")
+	charset := viper.GetString("datasource.charset")
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true",
 		username,
 		password,
@@ -27,7 +28,10 @@ func InitDb() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database,err:" + err.Error())
 	}
-	db.AutoMigrate(&model.User{})
+	errM := db.AutoMigrate(&model.User{}, &model.Document{})
+	if errM != nil {
+		panic("failed to migrate table:" + errM.Error())
+	}
 	DB = db
 	return db
 }
