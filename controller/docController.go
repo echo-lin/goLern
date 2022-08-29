@@ -25,8 +25,17 @@ func AddDoc(c *gin.Context) {
 	documentCreate := model.Document{
 		DocName: docData.DocName,
 	}
-	DB.Create(&documentCreate)
-	//dbres.Error
+
+	if documentCreate.DocName == "" {
+		response.Fail(c, "请正确填写数据", gin.H{})
+		return
+	}
+
+	dbRes := DB.Create(&documentCreate)
+	if dbRes.Error != nil {
+		response.Fail(c, "操作失败", gin.H{})
+	}
+
 	response.Success(c, "请求成功", gin.H{})
 }
 
